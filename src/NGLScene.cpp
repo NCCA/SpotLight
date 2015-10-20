@@ -76,8 +76,8 @@ void NGLScene::initializeGL()
   // we are creating a shader called Spotlight
   shader->createShaderProgram("Spotlight");
   // now we are going to create empty shaders for Frag and Vert
-  shader->attachShader("SpotlightVertex",ngl::VERTEX);
-  shader->attachShader("SpotlightFragment",ngl::FRAGMENT);
+  shader->attachShader("SpotlightVertex",ngl::ShaderType::VERTEX);
+  shader->attachShader("SpotlightFragment",ngl::ShaderType::FRAGMENT);
   // attach the source
   shader->loadShaderSource("SpotlightVertex","shaders/SpotlightVert.glsl");
   shader->loadShaderSource("SpotlightFragment","shaders/SpotlightFrag.glsl");
