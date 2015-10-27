@@ -95,7 +95,7 @@ void NGLScene::initializeGL()
   shader->setShaderParam1f("Normalize",1);
   glEnable(GL_DEPTH_TEST); // for removal of hidden surfaces
   // the shader will use the currently active material and light0 so set them
-  ngl::Material m(ngl::GOLD);
+  ngl::Material m(ngl::STDMAT::GOLD);
   // load our material values to the shader into the structure material (see Vertex shader)
   m.loadToShader("material");
   ngl::VAOPrimitives *prim =  ngl::VAOPrimitives::instance();
