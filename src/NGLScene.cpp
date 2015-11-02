@@ -39,14 +39,12 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-
-  // set the viewport for openGL
-  glViewport(0,0,_w,_h);
+  m_width=_event->size().width()*devicePixelRatio();
+  m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam->setShape(45,(float)_w/_h,0.05,350);
-  update();
+  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 
@@ -66,10 +64,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,4,10);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam= new ngl::Camera(from,to,up);
+  m_cam.set(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam->setShape(45,(float)720.0/576.0,0.5,150);
+  m_cam.setShape(45,(float)720.0/576.0,0.5,150);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -105,9 +103,6 @@ void NGLScene::initializeGL()
   // start some timers for the lights
   m_lightChangeTimer=startTimer(30);
   m_lightParamChangeTimer=startTimer(10);
-  // as re-size is not explicitly called we need to do this.
-  glViewport(0,0,width(),height());
-
 }
 
 
@@ -121,9 +116,9 @@ void NGLScene::loadMatricesToShader()
   ngl::Mat3 normalMatrix;
   // our model view matrix
   MV=m_transform.getMatrix()
-     *m_mouseGlobalTX*m_cam->getViewMatrix() ;
+     *m_mouseGlobalTX*m_cam.getViewMatrix() ;
   // our model view ;rojection matrix
-  MVP=MV*m_cam->getProjectionMatrix();
+  MVP=MV*m_cam.getProjectionMatrix();
   // calculate normal matrix by getting the top 3x3 of the MV
   normalMatrix=MV;
   // then calculate the inverse
@@ -138,9 +133,7 @@ void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // Rotation based on the mouse position for our global
-  // transform
-  ngl::Transformation trans;
+  glViewport(0,0,m_width,m_height);
   // Rotation based on the mouse position for our global
   // transform
   ngl::Mat4 rotX;
@@ -330,7 +323,7 @@ void NGLScene::createLights()
   }
   // get the inverse view matrix and load this to the light shader
   // we use this as we do the light calculations in eye space in the shader
-  ngl::Mat4 iv=m_cam->getViewMatrix();
+  ngl::Mat4 iv=m_cam.getViewMatrix();
   iv.transpose();
 
   for(int i=0; i<8; ++i)
