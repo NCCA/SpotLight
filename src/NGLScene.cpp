@@ -39,13 +39,6 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
-  // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
-}
 
 void NGLScene::resizeGL(int _w , int _h)
 {
@@ -96,7 +89,7 @@ void NGLScene::initializeGL()
   shader->linkProgramObject("Spotlight");
   // and make it active ready to load values
   (*shader)["Spotlight"]->use();
-  shader->setShaderParam1f("Normalize",1);
+  shader->setUniform("Normalize",1.0f);
   glEnable(GL_DEPTH_TEST); // for removal of hidden surfaces
   // the shader will use the currently active material and light0 so set them
   ngl::Material m(ngl::STDMAT::GOLD);
@@ -130,9 +123,9 @@ void NGLScene::loadMatricesToShader()
   // then calculate the inverse
   normalMatrix.inverse();
   // now load them to the current shader
-  shader->setShaderParamFromMat4("MV",MV);
-  shader->setShaderParamFromMat4("MVP",MVP);
-  shader->setShaderParamFromMat3("normalMatrix",normalMatrix);
+  shader->setUniform("MV",MV);
+  shader->setUniform("MVP",MVP);
+  shader->setUniform("normalMatrix",normalMatrix);
 }
 
 void NGLScene::paintGL()
@@ -352,25 +345,25 @@ void NGLScene::createLights()
 void NGLScene::changeSpotParams()
 {
   ngl::Random *rand=ngl::Random::instance();
-  rand->setSeed(time(NULL));
+  rand->setSeed(time(nullptr));
   // change the spot positions
 
-  for(int i=0; i<8; ++i)
+  for(size_t i=0; i<8; ++i)
   {
     float x=rand->randomNumber(3);
     float z=rand->randomNumber(3);
     m_spots[i].setPosition(ngl::Vec3(x,4,z));
-    m_spots[i].setCutoff(rand->randomPositiveNumber(24)+0.5);
-    m_spots[i].setInnerCutoff(rand->randomPositiveNumber(12)+0.1);
+    m_spots[i].setCutoff(rand->randomPositiveNumber(24)+0.5f);
+    m_spots[i].setInnerCutoff(rand->randomPositiveNumber(12)+0.1f);
 
     // now we update the spot values
     m_spotData[i].m_aimCenter=rand->getRandomPoint(x*4,0,z*4);
-    m_spotData[i].m_radiusX=rand->randomNumber(2)+0.5;
-    m_spotData[i].m_radiusZ=rand->randomNumber(2)+0.5;
-    m_spotData[i].m_time=rand->randomPositiveNumber(4)+0.6;
+    m_spotData[i].m_radiusX=rand->randomNumber(2)+0.5f;
+    m_spotData[i].m_radiusZ=rand->randomNumber(2)+0.5f;
+    m_spotData[i].m_time=rand->randomPositiveNumber(4)+0.6f;
     m_spotData[i].m_startColour =rand->getRandomColour();
     m_spotData[i].m_endColour =rand->getRandomColour();
-    m_spotData[i].m_mix=0.0;
+    m_spotData[i].m_mix=0.0f;
   }
 }
 void NGLScene::timerEvent(QTimerEvent *_event )
@@ -383,19 +376,19 @@ void NGLScene::timerEvent(QTimerEvent *_event )
    }
    static float time=0.0;
    // create pointers to the begining and end of the spot vector
-    int size=m_spots.size();
-    for(int i=0; i<size; ++i)
+    auto size=m_spots.size();
+    for(size_t i=0; i<size; ++i)
     {
-      float pointOnCircleX= cos(time+m_spotData[i].m_time)*m_spotData[i].m_radiusX;
-      float pointOnCircleZ= sin(time+m_spotData[i].m_time)*m_spotData[i].m_radiusZ;
+      float pointOnCircleX= cosf(time+m_spotData[i].m_time)*m_spotData[i].m_radiusX;
+      float pointOnCircleZ= sinf(time+m_spotData[i].m_time)*m_spotData[i].m_radiusZ;
       // get the points value we need
-      ngl::Vec4 p(m_spotData[i].m_aimCenter[0]+pointOnCircleX,0,m_spotData[i].m_aimCenter[2]+pointOnCircleZ,0.0);
+      ngl::Vec4 p(m_spotData[i].m_aimCenter.m_x+pointOnCircleX,0,m_spotData[i].m_aimCenter.m_z+pointOnCircleZ,0.0f);
       m_spots[i].setColour(trigInterp(m_spotData[i].m_startColour,m_spotData[i].m_endColour,m_spotData[i].m_mix ));
       // do the colour mixing
-      m_spotData[i].m_mix+=0.05;
-      if (m_spotData[i].m_mix >=1.0)
+      m_spotData[i].m_mix+=0.05f;
+      if (m_spotData[i].m_mix >=1.0f)
       {
-        m_spotData[i].m_mix=0.0;
+        m_spotData[i].m_mix=0.0f;
       }
       // set spot aim
       m_spots[i].aim(p);
