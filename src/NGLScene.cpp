@@ -114,14 +114,15 @@ void NGLScene::loadMatricesToShader()
   ngl::Mat4 MVP;
   ngl::Mat3 normalMatrix;
   // our model view matrix
-  MV=m_transform.getMatrix()
-     *m_mouseGlobalTX*m_cam.getViewMatrix() ;
+  MV=m_cam.getViewMatrix() *
+     m_mouseGlobalTX*
+     m_transform.getMatrix();
   // our model view ;rojection matrix
-  MVP=MV*m_cam.getProjectionMatrix();
+  MVP=m_cam.getProjectionMatrix()*MV;
   // calculate normal matrix by getting the top 3x3 of the MV
   normalMatrix=MV;
   // then calculate the inverse
-  normalMatrix.inverse();
+  normalMatrix.inverse().transpose();
   // now load them to the current shader
   shader->setUniform("MV",MV);
   shader->setUniform("MVP",MVP);
@@ -323,21 +324,21 @@ void NGLScene::createLights()
   // get the inverse view matrix and load this to the light shader
   // we use this as we do the light calculations in eye space in the shader
   ngl::Mat4 iv=m_cam.getViewMatrix();
-  iv.transpose();
-
-  for(int i=0; i<8; ++i)
+  iv.inverse().transpose();
+  int i=0;
+  for(auto &spot : m_spots)
   {
     // set the spot values
-    m_spots[i].setSpecColour(ngl::Colour(1,1,1,1));
-    m_spots[i].setCutoff(rand->randomPositiveNumber(24)+0.5);
-    m_spots[i].setInnerCutoff(rand->randomPositiveNumber(12)+0.1);
-    m_spots[i].setExponent(rand->randomPositiveNumber(2)+1);
-    m_spots[i].setAttenuation(1.0,0.0,0.0);
-    m_spots[i].enable();
-    m_spots[i].setTransform(iv);
+    spot.setSpecColour(ngl::Colour(1.0f,1.0f,1.0f,1.0f));
+    spot.setCutoff(rand->randomPositiveNumber(24.0f)+0.5f);
+    spot.setInnerCutoff(rand->randomPositiveNumber(12)+0.1f);
+    spot.setExponent(rand->randomPositiveNumber(2)+1.0f);
+    spot.setAttenuation(1.0f,0.0f,0.0f);
+    spot.enable();
+    spot.setTransform(iv);
 
-    QString light=QString("light[%1]").arg(i);
-    m_spots[i].loadToShader(light.toStdString());
+    QString light=QString("light[%1]").arg(i++);
+    spot.loadToShader(light.toStdString());
   }
 }
 
@@ -396,7 +397,7 @@ void NGLScene::timerEvent(QTimerEvent *_event )
       QString light=QString("light[%1]").arg(i);
       m_spots[i].loadToShader(light.toStdString());
     }
-    time+=0.2;
+    time+=0.2f;
     update();
 
   }

@@ -32,9 +32,9 @@ struct Lights
 		float spotCosCutoff;
 		float spotCosInnerCutoff;
 		float spotExponent;
-		float constantAttenuation;
-		float linearAttenuation;
-		float quadraticAttenuation;
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
 };
 
 // our material

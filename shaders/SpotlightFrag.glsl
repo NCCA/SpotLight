@@ -24,9 +24,9 @@ struct Lights
 		float spotCosCutoff;
 		float spotCosInnerCutoff;
 		float spotExponent;
-		float constantAttenuation;
-		float linearAttenuation;
-		float quadraticAttenuation;
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
 };
 // @param material passed from our program
 uniform Materials material;
@@ -45,8 +45,8 @@ vec4 spotLight (int _lightNum)
 		float pf=0;           // power factor
 		float spotDot;      // cosine of angle between spotlight
 		float spotAttenuation;     // spotlight attenuation factor;
-		float attenuation;  // computed attenuation factor
-		float d;            // distance from surface to light position
+    float attenuation;  // computed attenuation factor
+    float d;            // distance from surface to light position
 		vec3 VP;            // direction from surface to light position
 		vec3 reflection;    // direction of maximum highlights
 
@@ -60,11 +60,11 @@ vec4 spotLight (int _lightNum)
 		VP = normalize (VP);
 
 		// Compute attenuation
-		attenuation = 1.f / (light[_lightNum].constantAttenuation +
-												 light[_lightNum].linearAttenuation * d +
-												 light[_lightNum].quadraticAttenuation * d * d);
+    attenuation = 1.f / (light[_lightNum].constantAttenuation +
+                         light[_lightNum].linearAttenuation * d +
+                         light[_lightNum].quadraticAttenuation * d * d);
 
-		// See if point on surface is inside cone of illumination
+    // See if point on surface is inside cone of illumination
 		spotDot = dot (-VP, normalize (light[_lightNum].direction));
 
 		if (spotDot < light[_lightNum].spotCosCutoff)
@@ -80,8 +80,8 @@ vec4 spotLight (int _lightNum)
 		}
 
 		// Combine the spot and distance attenuation
-		attenuation *= spotAttenuation;
-		// calc the reflection for the highlight
+    attenuation *= spotAttenuation;
+    // calc the reflection for the highlight
 		reflection = normalize (reflect (-normalize (VP), normalize(fragmentNormal)));
 
 		nDotVP = max (0.f, dot (fragmentNormal, VP));
@@ -93,9 +93,9 @@ vec4 spotLight (int _lightNum)
 //        pf = pow (nDotR, material.shininess);
 		pf=clamp(nDotVP,0.0,pow (nDotR, material.shininess));
 		// combine the light / material values
-		vec4 ambient = material.ambient * light[_lightNum].ambient * attenuation;
-		vec4 diffuse = material.diffuse * light[_lightNum].diffuse * nDotVP * attenuation;
-		vec4 specular = material.specular * light[_lightNum].specular * pf * attenuation;
+    vec4 ambient = material.ambient * light[_lightNum].ambient * attenuation;
+    vec4 diffuse = material.diffuse * light[_lightNum].diffuse * nDotVP * attenuation;
+    vec4 specular = material.specular * light[_lightNum].specular * pf * attenuation;
 
 		return ambient + diffuse + specular;
 }
